@@ -15,11 +15,7 @@ const Dashboard = () => {
   const handleSearch = async () => {
     try {
       const data = await searchapi(searchTerm)
-      if (data) {
-        setApiResults(data)
-      } else {
-        setApiResults([])
-      }
+      setApiResults(data || [])
     } catch (err) {
       console.log(err)
     }
@@ -30,7 +26,6 @@ const Dashboard = () => {
       try {
         const data = await allapi()
         setApiResults(data)
-        console.log(data)
       } catch (error) {
         console.error("Failed to fetch API data:", error)
       }
@@ -58,78 +53,83 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="flex flex-col items-center p-8 min-h-screen bg-gray-900">
-      {/* Search Bar and Add-Api Button */}
-      <div className="flex flex-row gap-4 items-center mb-8">
-        <div className="w-full max-w-xl flex items-center rounded-full shadow-lg p-3 bg-gray-800">
+    <div className="flex flex-col items-center px-4 sm:px-6 lg:px-8 py-6 min-h-screen bg-gray-900 text-white">
+      {/* Top Controls */}
+      <div className="w-full max-w-5xl flex flex-col md:flex-row items-center justify-between gap-4 mb-10">
+        {/* Search Bar */}
+        <div className="flex w-full md:flex-1 items-center bg-gray-800 rounded-full shadow-lg p-2 px-4">
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search API name..."
-            className="flex-grow p-3 text-white bg-transparent border-none focus:ring-0 focus:outline-none placeholder-gray-400"
+            className="flex-grow text-sm sm:text-base p-2 text-white bg-transparent border-none placeholder-gray-400 focus:outline-none"
           />
           <button
             onClick={handleSearch}
-            className="ml-4 flex items-center px-5 py-2 bg-indigo-500 text-white font-semibold rounded-full shadow-md hover:bg-indigo-600 transition-all duration-300 ease-in-out transform hover:scale-105"
+            className="flex items-center gap-1 bg-indigo-500 text-white px-4 py-2 rounded-full hover:bg-indigo-600 transition duration-300"
           >
-            <SearchIcon className="h-5 w-5 mr-2" />
-            Search
+            <SearchIcon className="h-5 w-5" />
+            <span className="hidden sm:inline">Search</span>
           </button>
         </div>
+
+        {/* Add API Button */}
         <button
           onClick={handleaddapi}
-          className="flex items-center px-4 py-2 bg-green-500 text-white font-semibold rounded-full shadow-md hover:bg-green-600 transition-all duration-300 ease-in-out transform hover:scale-105"
+          className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full shadow-md hover:bg-green-600 transition duration-300"
         >
-          <PlusCircleIcon className="h-7 w-7" />
+          <PlusCircleIcon className="h-6 w-6" />
+          <span className="hidden sm:inline">Add API</span>
         </button>
       </div>
 
-      {/* Results Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl">
+      {/* Grid of Results */}
+      <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {apiResults.length > 0 ? (
           apiResults.map((api, index) => (
             <div
               key={index}
-              className="p-6 rounded-lg shadow-xl bg-gray-800 hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 cursor-pointer"
               onClick={() => openModal(api)}
+              className="bg-gray-800 p-5 rounded-xl shadow hover:shadow-lg transition-transform hover:scale-[1.02] cursor-pointer"
             >
-              <h2 className="text-xl font-semibold text-white mb-2">{api.apiName}</h2>
-              <p className="text-sm text-gray-400 mb-4">ID : <span className="font-medium">{api.id}</span></p>
+              <h3 className="text-lg font-semibold mb-2">{api.apiName}</h3>
+              <p className="text-gray-400 text-sm mb-3">ID: <span className="font-medium">{api.id}</span></p>
               <a
                 href={api.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center text-indigo-400 hover:text-indigo-600 font-semibold"
-                onClick={(e) => e.stopPropagation()} // Prevent modal from opening when clicking the link
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-600 font-medium text-sm"
               >
-                <ExternalLinkIcon className="h-5 w-5 mr-1" />
-                Visit API Website
+                <ExternalLinkIcon className="h-4 w-4" />
+                Visit Website
               </a>
             </div>
           ))
         ) : (
-          <p className="text-gray-400 text-center w-full">No results found.</p>
+          <p className="text-gray-400 text-center col-span-full">No results found.</p>
         )}
       </div>
 
       {/* Modal */}
       {isModalOpen && selectedApi && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-gray-800 rounded-lg shadow-xl p-8 max-w-lg w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold text-white">{selectedApi.apiName}</h2>
-              <button onClick={closeModal} className="text-white hover:text-red-500 transition">
-                <XIcon className="h-6 w-6" />
-              </button>
-            </div>
-            <p className="text-gray-300 mb-4">Description: {selectedApi.description}</p>
-            <p className="text-gray-400 mb-4">Posted by: <span className="font-medium">{selectedApi.id}</span></p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4">
+          <div className="bg-gray-800 rounded-xl p-6 sm:p-8 w-full max-w-md sm:max-w-lg relative shadow-2xl">
+            <button
+              onClick={closeModal}
+              className="absolute top-3 right-3 text-white hover:text-red-500"
+            >
+              <XIcon className="h-6 w-6" />
+            </button>
+            <h2 className="text-2xl font-bold mb-3">{selectedApi.apiName}</h2>
+            <p className="text-gray-300 mb-2 text-sm">Description: {selectedApi.description}</p>
+            <p className="text-gray-400 mb-4 text-sm">Posted by: <span className="font-medium">{selectedApi.id}</span></p>
             <a
               href={selectedApi.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center text-indigo-400 hover:text-indigo-600 font-semibold"
+              className="inline-flex items-center text-indigo-400 hover:text-indigo-600 font-semibold text-sm"
             >
               <ExternalLinkIcon className="h-5 w-5 mr-1" />
               Visit API Website
